@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Upload Company Email Formats</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Upload Excel File</button>
+                        </div>
+                    </form>
+
+                    <!-- Caution Message Start -->
+                    <div class="alert alert-warning mt-4">
+                        <strong>Caution:</strong> Please upload an Excel file with the following columns:
+                        <ul>
+                            <li><strong>Company Name</strong> - The name of the company.</li>
+                            <li><strong>Domain</strong> - The domain name associated with the company.</li>
+                            <li><strong>Email Format</strong> - The email format pattern (e.g., {first_name}.{last_name}@domain.com).</li>
+                            <li><strong>Country</strong> - The country where the company is based.</li>
+                        </ul>
+                        Make sure to match the company name, domain, and country for proper format application.
+                    </div>
+                    <!-- Caution Message End -->
+
+                    {% if messages %}
+                        <div class="mt-3">
+                            {% for message in messages %}
+                                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} mt-2">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

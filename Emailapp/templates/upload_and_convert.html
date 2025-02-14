@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h4 class="text-center mb-4">Extraction Data</h4>
+    <form method="post" enctype="multipart/form-data" class="p-4 border rounded">
+        {% csrf_token %}
+        
+        <!-- File Input -->
+        <div class="form-group mb-3">
+            <label for="file">{{ form.file.label }}</label>
+            <input type="file" name="file" id="file" class="form-control" required>
+        </div>
+        
+        <!-- Custom Select for Country -->
+        <div class="form-group mb-3">
+            <label for="country">Select Country:</label>
+            <select name="country" id="country" class="form-control" required>
+                <option value="">Select Country</option>
+                <option value="USA">USA</option>
+                <option value="India">India</option>
+                <option value="Canada">Canada</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="Australia">Australia</option>
+                <!-- Add more countries as needed -->
+            </select>
+        </div>
+        
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-success btn-block">Upload and Convert</button>
+    </form>
+</div>
+
+{% endblock %}
