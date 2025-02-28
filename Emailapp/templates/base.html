@@ -178,6 +178,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'upload_and_convert' %}">Notepad</a>
                             </li>
+                            <li class="nav-item">
+                                <a href="/" class="nav-link">Logout</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -188,29 +191,7 @@
 
         <div class="container content">
             {% block content %}
-            <div class="card">
-                <h2>Get Started</h2>
-                <p>Use the navigation to add companies, define email formats, and upload your data to generate emails.</p>
-                <!-- Responsive form example -->
-                <form>
-                    <div class="form-group">
-                        <label for="company">Company Name:</label>
-                        <input type="text" class="form-control" id="company" name="company">
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email Format:</label>
-                        <input type="text" class="form-control" id="email" name="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="country">Country:</label>
-                        <select class="form-control" id="country" name="country">
-                            <option value="us">United States</option>
-                            <option value="uk">United Kingdom</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-            </div>
+            
             {% endblock %}
         </div>
 
