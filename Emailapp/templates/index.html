@@ -1,0 +1,44 @@
+{% extends 'baseindex.html' %}                   
+
+{% block content %}
+<div class="container-fluid">
+   <div class="row">
+      <div class="col-lg-3 col-sm-0 col-md-0">
+      </div>
+
+      <div class="col-lg-6 col-sm-12 col-md-12">
+         {% if msg %}
+         <div class="alert {% if msg == 'Invalid Login Details' %} alert-danger {% else %} alert-success {% endif %} mt-3">
+            {{ msg }}
+         </div>
+         {% endif %}
+         
+         <form name="form1" method="post" class="form-control" autocomplete="off">
+            <div class="container-fluid">
+               <div class="row form-floating">
+                  <div class="col-lg-12 col-sm-12 col-md-12 mt-2">
+                     <font color="red">*</font><b>Mobile Number</b>
+                     <input type="number" autofocus="on" name="txtmobilenumber" class="form-control" placeholder="Enter Registered Mobile Number" required>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-lg-12 col-sm-12 col-md-12 mt-2">
+                     <font color="red">*</font><b>Password</b>
+                     <input type="password" name="txtpassword" class="form-control" placeholder="Enter Password" maxlength="20" autocomplete="off" required>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-lg-12 col-sm-12 col-md-12"><br/>
+                     <center>
+                        <button type="submit" class="btn btn-success">Log in</button>
+                        <input type="reset" name="btnreset" value="Cancel" class="btn btn-warning">
+                     </center>
+                  </div>
+               </div>
+            </div>
+            {% csrf_token %}
+         </form>
+      </div>
+   </div>
+</div>
+{% endblock %}

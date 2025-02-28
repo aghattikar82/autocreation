@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from io import BytesIO
 from django.contrib import messages
 from .forms import CompanyForm, EmailFormatForm, UploadFileForm
-from .models import Company, EmailFormat
+from .models import Company, EmailFormat,UserRegister
 import pandas as pd
 from django.http import HttpResponse
 from .forms import UploadFileForm
@@ -14,6 +14,20 @@ from datetime import datetime
 from .forms import UploadNotepadForm, UploadFileForm
 from unidecode import unidecode
 
+def index(request):
+    msg = ''
+    userpassword=""
+    if request.method == 'POST':
+        usermobilenumber = request.POST['txtmobilenumber']
+        userpassword = request.POST['txtpassword']
+        if UserRegister.objects.filter(mobilenumber=usermobilenumber,password=userpassword).exists():
+            data=UserRegister.objects.get(mobilenumber=usermobilenumber,password=userpassword)
+            request.session["optmobilenumber"]=request.POST['txtmobilenumber']
+            return redirect("add_company")
+            msg="Loged in Successfully"
+        else:
+            msg="Invalid Login Details"
+    return render(request, 'index.html', {'msg': msg})
 
 # List of common certifications or titles to exclude from names
 EXCLUDED_TITLES = [
