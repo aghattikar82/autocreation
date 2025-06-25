@@ -31,22 +31,54 @@ def index(request):
 
 # List of common certifications or titles to exclude from names
 EXCLUDED_TITLES = [
+    "CTP","MPS" "HRER",  "PharmD","CBPA","CSP","CHC" "CHP","CEM","MEd","PHR","MMR","CSP",
+     "ASP QSSP","CFPIM" "CIRM","EdD","CPSM","MEd","MHA","MHRM","CEng MIET","CMA",
     "PMP", "MBA", "CSM", "ITIL", "CSPO", "SFC", "ACP", "SAP Successfactors", "EC implementation", "CTDP",
-    "SAFe", "SAFe®", "Six Sigma", "PSPO", "PMI-PBA", "SPOC", "M.Eng", "MA", "B.Eng", "MSc", "CBAP", "CFA", 
+    "SAFe", "SAFe®", "Six Sigma", "PSPO", "PMI-PBA", "SPOC", "M.Eng", "MA", "B.Eng", "MSc", "CBAP", "CFA",
     "FRM", "PRINCE2", "SSM", "CISA", "DASSM", "PgMP", "SAMC", "ITIL", "GCPM", "TOGAF", "Prosci", "6σ", "FPC",
-    "P.Eng.", "GCPM", "TOGAF", "CAPM", "P.Eng", "PhD", "SCM", "PMP®", "CSPO®", "SAFe SPC", "SAFe®6", "AI certified", 
+    "P.Eng.", "GCPM", "TOGAF", "CAPM", "P.Eng", "PhD", "SCM", "PMP®", "CSPO®", "SAFe SPC", "SAFe®6", "AI certified",
     "AI", "PMP®", "PSM", "PMI-ACP", "PSM I", "SASM", "SσBB™", "PMP®, PMP®, CSPO®, PMP®, CSM", "BSc", "MGP", "CBAP®",
-    "M.Eng", "MS", "SASM", "CBAP®", "M.Eng", "PMI-ACP", "PRINCE2P"
+    "M.Eng", "MS", "SASM", "CBAP®", "M.Eng", "PMI-ACP", "PRINCE2P","csm", "pmp", "cspo", "mba", "bsc", "msc", "phd",
+    "cpa", "gaicd", "psm", "ma", "ms", "iii", "jr","PMP-ACP","APMP","MBAPMP","MScPMPCSM","ACSM","CSMCSPO","A-CSM","MScPMPCSM","CSMSSMSASM",
+    "PMP-ACP","CSMCSPO","MSc","MSCS","PhD","PSMII","Jr","-","She/her","He/him","ACIR", "ADC", "AIS", "AMSP", "ASA", "BA", "CAMS", 
+    "CASR", "CBCP", "CCP", "CCRP", "CCSP", "CDEI", "CDP", "CDPSE", "CEDS", "CEP", "CERP", "CFE", "CIMSP", "CIPP", "CIR", "CISSP", 
+    "CLCS", "CMB", "CMP", "CNP", "CPP", "CPCU", "Crowe", "Crue", "CRCP", "CRMA", "CRU", "DBA", "Data Science", "Esq", "FCCA", "FMP",
+    "GCED", "GRS", "GSLC", "HCA", "HRD", "IPPI", "JD", "LLM", "LUMA", "MA", "MAI", "MAcc", "MBA", "MEd", "MPA", "MPH", "MS", "MSA",
+    "MSBA", "MSF", "MSHRM", "MSITM", "MSM", "MSMIT", "MSRE", "MST", "PhD", "Polen", "PSP", "RES", "RRS", "Science", "SHRMCP", 
+    "SHRMSCP", "SRA", "SPC", "SPHR", "US", "Zin"
+
+
 ]
+
+EXCLUDED_COMPANIES = {
+    "N/A", "netflix", "private company", "servicenow",
+    "ibm", "freelance", "independent", "linkedin", "facebook",
+    "instagram", "tiktok", "salesforce", "retired", "self","student",
+    "currently", "seeking", "looking", "open to work", "contract",
+    ".ai", "currently", "seeking", "looking", "open to work",
+    "contract", "consultant", "youtube","freelancing","Freelancer","Constellation","Contractor" , "undisclosed",  "youtube" ,"none","N/A"
+    ,"confidential","self-employed","self employed","selfemployed","selfemployed","freelance","freelancing","freelancer","freelance developer",
+    "freelance developer","freelance software engineer","freelance software developer","freelance web developer","freelance web designer",
+    "retired","Semi-Retired", "Unemployed","open to oppurtunities","cash app","( in company )",
+}
+
+def is_valid_company(company_name):
+    company_name = company_name.lower()
+    return not any(keyword in company_name for keyword in EXCLUDED_COMPANIES)
 
 def is_human_name(name):
     # Regular expression to allow names with letters, periods, hyphens, apostrophes, and parentheses
     name_pattern = re.compile(r"^[a-zA-ZÀ-ÿ'-.() ]+$")
 
-    # Clean the name by removing titles or certifications
+    # Clean the name by removing titles or certifications (case-insensitive)
     name_cleaned = name
     for title in EXCLUDED_TITLES:
-        name_cleaned = re.sub(rf'\b{title}\b', '', name_cleaned)
+        # Escape special regex characters and match whole words case-insensitively
+        name_cleaned = re.sub(
+            rf'(?i)\b{re.escape(title)}\b',
+            '',
+            name_cleaned
+        )
 
     # Remove trailing punctuation like ., ,, -
     name_cleaned = re.sub(r'[,.-]+$', '', name_cleaned).strip()
@@ -55,7 +87,7 @@ def is_human_name(name):
     name_cleaned = name_cleaned.replace('.', '')
 
     # Strip extra spaces and check if the name matches the pattern
-    name_cleaned = name_cleaned.strip()
+    name_cleaned = re.sub(r'\s+', ' ', name_cleaned).strip()
 
     # Split the cleaned name into parts
     name_parts = name_cleaned.split()
@@ -76,7 +108,7 @@ def upload_and_convert(request):
             if not selected_country:
                 messages.error(request, "Please select a valid country.")
                 return render(request, 'upload_and_convert.html', {'form': form})
-            
+
             try:
                 # Read uploaded file
                 uploaded_file = request.FILES.get('file', None)
@@ -116,7 +148,7 @@ def upload_and_convert(request):
                             'Source': 'LinkedIn',
                             'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
                         })
-                        continue  # Skip profiles that don't have enough data
+                        continue
 
                     # Extract Full Name from the 3rd line
                     full_name = lines[2].strip() if len(lines) > 2 else "N/A"
@@ -136,84 +168,94 @@ def upload_and_convert(request):
                             'Source': 'LinkedIn',
                             'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
                         })
-                        continue  # Skip non-human names
+                        continue
 
                     # Clean the full name (remove titles like PMP, MBA, etc.)
-                    full_name = unidecode(full_name)  # Convert non-English characters to English equivalents
-                    name_parts = full_name.split()
-                    name_parts_cleaned = [part for part in name_parts if part not in EXCLUDED_TITLES]
-                    
-                    # Extract first and last names
-                    first_name = name_parts_cleaned[0].strip() if len(name_parts_cleaned) > 0 else 'N/A'
-                    last_name = name_parts_cleaned[-1].strip() if len(name_parts_cleaned) > 1 else 'N/A'
+                    # Clean the full name (remove titles like PMP, MBA, etc.)
+                    full_name = unidecode(full_name)
+                    # Remove EXCLUDED_TITLES from the full name
+                    for title in EXCLUDED_TITLES:
+                        full_name = re.sub(rf'(?i)\b{re.escape(title)}\b', '', full_name)
 
-                    # Remove periods and commas from full name, first name, and last name
+                    # Clean extra spaces and punctuation from full name
                     full_name = re.sub(r'[.,]', '', full_name)
-                    first_name = re.sub(r'[.,]', '', first_name)
-                    last_name = re.sub(r'[.,]', '', last_name)
+                    full_name = re.sub(r'\s+', ' ', full_name).strip()
 
-                    # Extract Designation and Company from the 6th line (splitting by two spaces or unexpected characters)
+                    # Now split cleaned name
+                    name_parts = full_name.split()
+
+                    # Extract first and last names after full cleaning
+                    first_name = name_parts[0].strip() if len(name_parts) > 0 else 'N/A'
+                    last_name = name_parts[-1].strip() if len(name_parts) > 1 else 'N/A'
+
+
+                    # Extract Designation and Company from the 6th line
                     role_company_line = lines[5].strip() if len(lines) > 5 else "N/A"
                     role = company = 'N/A'
 
-                    # Look for patterns like space, comma, or special characters between designation and company
                     if '  ' in role_company_line:
-                        parts = role_company_line.split('  ')  # Split by double spaces
+                        parts = role_company_line.split('  ')
                         role = parts[0].strip() if len(parts) > 0 else 'N/A'
                         company = parts[1].strip() if len(parts) > 1 else 'N/A'
                     elif ',' in role_company_line or '|' in role_company_line or '-,-' in role_company_line or '"' in role_company_line:
-                        # Handle cases where delimiters are commas, pipe symbols, etc.
-                        parts = re.split(r'[ ,|"-,-]', role_company_line)  # Split by space, comma, or special characters
+                        parts = re.split(r'[ ,|"-,-]', role_company_line)
                         role = parts[0].strip() if len(parts) > 0 else 'N/A'
                         company = parts[1].strip() if len(parts) > 1 else 'N/A'
-                    elif role_company_line:  # If there's only one part (designation or company)
-                        role = role_company_line.strip()  # Treat as role if no clear company part is present
+                    elif role_company_line:
+                        role = role_company_line.strip()
+
+                    for excluded_company in EXCLUDED_COMPANIES:
+                        role = re.sub(rf'(?i)\b{re.escape(excluded_company)}\b', '', role)
+                        role = re.sub(r'\s+', ' ', role).strip()
+
+                    # Validate company
+                    if not is_valid_company(company):
+                        skipped_profile_list.append({
+                            'Full Name': full_name,
+                            'Skipped Reason': 'Excluded company',
+                            'Company Name': company,
+                            'First Name': first_name,
+                            'Last Name': last_name,
+                            'Country': selected_country,
+                            'Designation': role,
+                            'Location': 'N/A',
+                            'Industry': 'N/A',
+                            'Source': 'LinkedIn',
+                            'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
+                        })
+                        continue
 
                     # Extract Location from the 7th line
                     location = lines[6].strip() if len(lines) > 6 else "N/A"
                     if not location:
                         location = 'N/A'
 
-                    # If location is still missing or incorrectly extracted, try extracting from next available data
-                    if '  ' in location:  # If a space or special character pattern exists, handle accordingly
-                        location_parts = re.split(r'[ ,|"-,-]', location)
-                        location = location_parts[0].strip() if location_parts else 'N/A'
-
                     # Set static values for Industry, Source, and File Name
-                    industry = ''  # Blank for now, so using N/A
+                    industry = ''
                     source = 'LinkedIn'
 
                     # Add valid profile to the list
                     profile_list.append({
-                        'Company Name': company if company else 'N/A',
-                        'First Name': first_name if first_name else 'N/A',
-                        'Last Name': last_name if last_name else 'N/A',
-                        'Country': selected_country,  # Use the selected country here
-                        'Designation': role if role else 'N/A',
-                        'Location': location if location else 'N/A',
+                        'Company Name': company,
+                        'First Name': first_name,
+                        'Last Name': last_name,
+                        'Country': selected_country,
+                        'Designation': role,
+                        'Location': location,
                         'Industry': industry,
                         'Source': source,
-                        'Full Name': full_name if full_name else 'N/A',
+                        'Full Name': full_name,
                         'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
                     })
 
-                # If no valid profiles were found
-                if not profile_list and not skipped_profile_list:
-                    messages.error(request, "No valid profiles were found in the file.")
-                    return render(request, 'upload_and_convert.html', {'form': form})
-
-                # Create a DataFrame from the profile list
-                df_valid = pd.DataFrame(profile_list)
-                df_skipped = pd.DataFrame(skipped_profile_list)
-
-                # Create the Excel file as a response
+                # Create response
                 response = HttpResponse(content_type='application/vnd.ms-excel')
                 response['Content-Disposition'] = f'attachment; filename="developer_profiles_{datetime.today().strftime("%Y-%m-%d")}.xlsx"'
 
-                # Write valid profiles to the first sheet and skipped profiles to the second sheet
+                # Write to Excel
                 with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
-                    df_valid.to_excel(writer, sheet_name='Valid Profiles', index=False)
-                    df_skipped.to_excel(writer, sheet_name='Skipped Profiles', index=False)
+                    pd.DataFrame(profile_list).to_excel(writer, sheet_name='Valid Profiles', index=False)
+                    pd.DataFrame(skipped_profile_list).to_excel(writer, sheet_name='Skipped Profiles', index=False)
 
                 return response
 
