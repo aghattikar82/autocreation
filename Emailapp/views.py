@@ -32,7 +32,7 @@ def index(request):
 # List of common certifications or titles to exclude from names
 EXCLUDED_TITLES = [
     "CTP","MPS" "HRER",  "PharmD","CBPA","CSP","CHC" "CHP","CEM","MEd","PHR","MMR","CSP",
-     "ASP QSSP","CFPIM" "CIRM","EdD","CPSM","MEd","MHA","MHRM","CEng MIET","CMA",
+    "ASP QSSP","CFPIM" "CIRM","EdD","CPSM","MEd","MHA","MHRM","CEng MIET","CMA",
     "PMP", "MBA", "CSM", "ITIL", "CSPO", "SFC", "ACP", "SAP Successfactors", "EC implementation", "CTDP",
     "SAFe", "SAFe®", "Six Sigma", "PSPO", "PMI-PBA", "SPOC", "M.Eng", "MA", "B.Eng", "MSc", "CBAP", "CFA",
     "FRM", "PRINCE2", "SSM", "CISA", "DASSM", "PgMP", "SAMC", "ITIL", "GCPM", "TOGAF", "Prosci", "6σ", "FPC",
@@ -45,7 +45,8 @@ EXCLUDED_TITLES = [
     "CLCS", "CMB", "CMP", "CNP", "CPP", "CPCU", "Crowe", "Crue", "CRCP", "CRMA", "CRU", "DBA", "Data Science", "Esq", "FCCA", "FMP",
     "GCED", "GRS", "GSLC", "HCA", "HRD", "IPPI", "JD", "LLM", "LUMA", "MA", "MAI", "MAcc", "MBA", "MEd", "MPA", "MPH", "MS", "MSA",
     "MSBA", "MSF", "MSHRM", "MSITM", "MSM", "MSMIT", "MSRE", "MST", "PhD", "Polen", "PSP", "RES", "RRS", "Science", "SHRMCP", 
-    "SHRMSCP", "SRA", "SPC", "SPHR", "US", "Zin"
+    "SHRMSCP", "SRA", "SPC", "SPHR", "US", "Zin","cet","eit","cphr","phd","msc","bsc","ctech","p eng","m eng","meng","peng","CHRP","RSE",
+    "CRHA","bba","CHRL","DipWSET"
 
 
 ]
@@ -60,6 +61,10 @@ EXCLUDED_COMPANIES = {
     ,"confidential","self-employed","self employed","selfemployed","selfemployed","freelance","freelancing","freelancer","freelance developer",
     "freelance developer","freelance software engineer","freelance software developer","freelance web developer","freelance web designer",
     "retired","Semi-Retired", "Unemployed","open to oppurtunities","cash app","( in company )",
+    "3M", "abc", "Abilis Solutions", "Accenture", "Adobe", "AECOM", "Affinity", "Amazon", "Amex", "Aon", 
+    "Bell", "BlackBerry", "CBC", "CGI", "CIBC", "Cisco", "Citi Bank", "Citizens", "Cognizant", "Dell", 
+    "Deloitte Inc.", "GE", "Hewlett Packard", "Infosys", "JP Morgan", "Microsoft", "Oracle", "ORANGE", 
+    "RBC Bank", "Sage", "Scotiabank", "SE Health", "Siemens", "Sisense", "TD Bank", "TELUS", "Wipro"
 }
 
 def is_valid_company(company_name):
@@ -81,7 +86,8 @@ def is_human_name(name):
         )
 
     # Remove trailing punctuation like ., ,, -
-    name_cleaned = re.sub(r'[,.-]+$', '', name_cleaned).strip()
+    # Remove trailing punctuation and symbols like ., ,, -, ;, :, /, \, |, _, (, ), [, ], {, }, ', ", !, ?, @, #, $, %, ^, &, *, ~, `
+    name_cleaned = re.sub(r'[\s,.\-;:/\\|_\(\)\[\]\{\}\'"!?\@\#\$\%\^\&\*\~\`]+$', '', name_cleaned).strip()
 
     # Remove periods from the cleaned name
     name_cleaned = name_cleaned.replace('.', '')
