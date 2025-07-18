@@ -50,7 +50,8 @@ EXCLUDED_TITLES = [
 
 
 ]
-
+# Set of company names to exclude
+# This set contains common company names, freelance terms, and other keywords that should be excluded`
 EXCLUDED_COMPANIES = {
     "N/A", "netflix", "private company", "servicenow",
     "ibm", "freelance", "independent", "linkedin", "facebook",
