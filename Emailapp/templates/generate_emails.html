@@ -9,13 +9,16 @@
                     <h4 class="mb-0">Generate Emails</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
+                    <form id="uploadForm" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         {{ form.as_p }}
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success">Upload Excel File</button>
                         </div>
                     </form>
+
+                    <!-- Processing time message -->
+                    <div id="processingTime" class="alert alert-info mt-3" style="display: none;"></div>
 
                     <!-- Caution Message Start -->
                     <div class="alert alert-warning mt-4">
@@ -25,7 +28,6 @@
                             <li><strong>First Name</strong> - The first name of the employee.</li>
                             <li><strong>Last Name</strong> - The last name of the employee.</li>
                             <li><strong>Country</strong> - The country of the company.</li>
-
                         </ul>
                         Make sure the company and domain name match with existing entries in the system for accurate email generation.
                     </div> 
@@ -46,4 +48,51 @@
         </div>
     </div>
 </div>
+
+<!-- Processing Time Script -->
+<script>
+    const uploadForm = document.getElementById('uploadForm');
+    const processingTimeDiv = document.getElementById('processingTime');
+
+    let startTime = 0;
+
+    uploadForm.addEventListener('submit', function (e) {
+        const fileInput = document.querySelector('input[type="file"]');
+
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const fileSizeMB = file.size / (1024 * 1024); // bytes to MB
+            const assumedDownloadSpeedMBps = 1; // Assume 1 MB/sec download speed
+            const estimatedDownloadTime = (fileSizeMB / assumedDownloadSpeedMBps).toFixed(2);
+
+            // Optionally estimate processing time
+            const estimatedProcessingTime = 60; // Static estimate (you can adjust)
+
+            const estimatedTotalTime = (parseFloat(estimatedProcessingTime) + parseFloat(estimatedDownloadTime)).toFixed(2);
+
+            // Show estimated time
+            processingTimeDiv.style.display = 'block';
+            processingTimeDiv.innerHTML = `
+                <strong>Estimated time:</strong> 
+                Processing ~ ${estimatedProcessingTime}s + Download ~ ${estimatedDownloadTime}s 
+                = <strong>${estimatedTotalTime}s</strong> total.
+                <br>Please wait...
+            `;
+
+            // Start actual timer
+            startTime = performance.now();
+        }
+    });
+
+    // When page reloads after response/download
+    window.addEventListener('load', () => {
+        if (startTime > 0) {
+            const endTime = performance.now();
+            const actualTime = ((endTime - startTime) / 1000).toFixed(2);
+            processingTimeDiv.innerHTML += `<br>✅ <strong>Completed in ${actualTime} seconds</strong>.`;
+        }
+    });
+</script>
+
+
 {% endblock %}
