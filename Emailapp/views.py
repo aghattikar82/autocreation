@@ -31,7 +31,7 @@ def index(request):
 
 # List of common certifications or titles to exclude from names
 EXCLUDED_TITLES = [
-    "CTP","MPS" "HRER",  "PharmD","CBPA","CSP","CHC" "CHP","CEM","MEd","PHR","MMR","CSP",
+    "CTP","MPS", "HRER",  "PharmD","CBPA","CSP","CHC" "CHP","CEM","MEd","PHR","MMR","CSP",
     "ASP QSSP","CFPIM" "CIRM","EdD","CPSM","MEd","MHA","MHRM","CEng MIET","CMA",
     "PMP", "MBA", "CSM", "ITIL", "CSPO", "SFC", "ACP", "SAP Successfactors", "EC implementation", "CTDP",
     "SAFe", "SAFe®", "Six Sigma", "PSPO", "PMI-PBA", "SPOC", "M.Eng", "MA", "B.Eng", "MSc", "CBAP", "CFA",
@@ -46,9 +46,8 @@ EXCLUDED_TITLES = [
     "GCED", "GRS", "GSLC", "HCA", "HRD", "IPPI", "JD", "LLM", "LUMA", "MA", "MAI", "MAcc", "MBA", "MEd", "MPA", "MPH", "MS", "MSA",
     "MSBA", "MSF", "MSHRM", "MSITM", "MSM", "MSMIT", "MSRE", "MST", "PhD", "Polen", "PSP", "RES", "RRS", "Science", "SHRMCP", 
     "SHRMSCP", "SRA", "SPC", "SPHR", "US", "Zin","cet","eit","cphr","phd","msc","bsc","ctech","p eng","m eng","meng","peng","CHRP","RSE",
-    "CRHA","bba","CHRL","DipWSET"
-
-
+    "CRHA","bba","CHRL","DipWSET","Dr","md","PhD","MSc","BSc","B.Eng","M.Eng","MBA","PMP","CFA","CPA","CA","CMA","ed",
+    "MSc,",",",
 ]
 # Set of company names to exclude
 # This set contains common company names, freelance terms, and other keywords that should be excluded`
@@ -72,39 +71,36 @@ def is_valid_company(company_name):
     company_name = company_name.lower()
     return not any(keyword in company_name for keyword in EXCLUDED_COMPANIES)
 
+# Update in is_human_name() function
 def is_human_name(name):
-    # Regular expression to allow names with letters, periods, hyphens, apostrophes, and parentheses
-    name_pattern = re.compile(r"^[a-zA-ZÀ-ÿ'-.() ]+$")
+    # Regular expression to allow names with letters, hyphens, apostrophes, and parentheses (no longer removing hyphen)
+    name_pattern = re.compile(r"^[a-zA-ZÀ-ÿ'()\- ]+$")
 
     # Clean the name by removing titles or certifications (case-insensitive)
     name_cleaned = name
     for title in EXCLUDED_TITLES:
-        # Escape special regex characters and match whole words case-insensitively
         name_cleaned = re.sub(
             rf'(?i)\b{re.escape(title)}\b',
             '',
             name_cleaned
         )
 
-    # Remove trailing punctuation like ., ,, -
-    # Remove trailing punctuation and symbols like ., ,, -, ;, :, /, \, |, _, (, ), [, ], {, }, ', ", !, ?, @, #, $, %, ^, &, *, ~, `
-    name_cleaned = re.sub(r'[\s,.\-;:/\\|_\(\)\[\]\{\}\'"!?\@\#\$\%\^\&\*\~\`]+$', '', name_cleaned).strip()
+    # Remove trailing punctuation and symbols (except hyphens now)
+    name_cleaned = re.sub(r'[\s,.;:/\\|_\(\)\[\]\{\}\'"!?\@\#\$\%\^\&\*\~\`]+$', '', name_cleaned).strip()
 
-    # Remove periods from the cleaned name
+    # Remove periods only, retain hyphens
     name_cleaned = name_cleaned.replace('.', '')
 
-    # Strip extra spaces and check if the name matches the pattern
+    # Strip extra spaces
     name_cleaned = re.sub(r'\s+', ' ', name_cleaned).strip()
 
     # Split the cleaned name into parts
     name_parts = name_cleaned.split()
 
-    # Ensure that the cleaned name still has at least two valid parts (first name and last name)
     if len(name_parts) >= 2 and name_pattern.match(name_cleaned):
-        # Check if each part of the name is valid (alphabetic or allowed punctuation)
         return all(re.match(r"[a-zA-ZÀ-ÿ'-]+", part) for part in name_parts)
-
     return False
+
 
 def upload_and_convert(request):
     if request.method == 'POST':
@@ -153,12 +149,14 @@ def upload_and_convert(request):
                             'Location': 'N/A',
                             'Industry': 'N/A',
                             'Source': 'LinkedIn',
+                            'Raw Full Name': raw_full_name,
                             'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
                         })
                         continue
 
                     # Extract Full Name from the 3rd line
-                    full_name = lines[2].strip() if len(lines) > 2 else "N/A"
+                    raw_full_name = lines[2].strip() if len(lines) > 2 else "N/A"
+                    full_name = raw_full_name
 
                     # Check if the full_name is likely to be a human name
                     if not is_human_name(full_name):
@@ -179,19 +177,21 @@ def upload_and_convert(request):
 
                     # Clean the full name (remove titles like PMP, MBA, etc.)
                     # Clean the full name (remove titles like PMP, MBA, etc.)
+                    full_name = lines[2].strip() if len(lines) > 2 else "N/A"
                     full_name = unidecode(full_name)
                     # Remove EXCLUDED_TITLES from the full name
                     for title in EXCLUDED_TITLES:
                         full_name = re.sub(rf'(?i)\b{re.escape(title)}\b', '', full_name)
 
                     # Clean extra spaces and punctuation from full name
-                    full_name = re.sub(r'[.,]', '', full_name)
+                    full_name = re.split(r'\s[-|,]\s', full_name)[0].strip()
+                    full_name = full_name.replace('.', '')
+
+                    # Clean up extra spaces
                     full_name = re.sub(r'\s+', ' ', full_name).strip()
 
                     # Now split cleaned name
                     name_parts = full_name.split()
-
-                    # Extract first and last names after full cleaning
                     first_name = name_parts[0].strip() if len(name_parts) > 0 else 'N/A'
                     last_name = name_parts[-1].strip() if len(name_parts) > 1 else 'N/A'
 
@@ -228,6 +228,7 @@ def upload_and_convert(request):
                             'Location': 'N/A',
                             'Industry': 'N/A',
                             'Source': 'LinkedIn',
+                            'Raw Full Name': raw_full_name,
                             'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
                         })
                         continue
@@ -252,6 +253,7 @@ def upload_and_convert(request):
                         'Industry': industry,
                         'Source': source,
                         'Full Name': full_name,
+                        'Raw Full Name': raw_full_name,
                         'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
                     })
 
