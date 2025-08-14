@@ -40,7 +40,7 @@ EXCLUDED_TITLES = [
     "AI", "PMP®", "PSM", "PMI-ACP", "PSM I", "SASM", "SσBB™", "PMP®, PMP®, CSPO®, PMP®, CSM", "BSc", "MGP", "CBAP®",
     "M.Eng", "MS", "SASM", "CBAP®", "M.Eng", "PMI-ACP", "PRINCE2P","csm", "pmp", "cspo", "mba", "bsc", "msc", "phd",
     "cpa", "gaicd", "psm", "ma", "ms", "iii", "jr","PMP-ACP","APMP","MBAPMP","MScPMPCSM","ACSM","CSMCSPO","A-CSM","MScPMPCSM","CSMSSMSASM",
-    "PMP-ACP","CSMCSPO","MSc","MSCS","PhD","PSMII","Jr","-","She/her","He/him","ACIR", "ADC", "AIS", "AMSP", "ASA", "BA", "CAMS", 
+    "PMP-ACP","CSMCSPO","MSc","MSCS","PhD","PSMII","Jr",",","She/her","He/him","ACIR", "ADC", "AIS", "AMSP", "ASA", "BA", "CAMS", 
     "CASR", "CBCP", "CCP", "CCRP", "CCSP", "CDEI", "CDP", "CDPSE", "CEDS", "CEP", "CERP", "CFE", "CIMSP", "CIPP", "CIR", "CISSP", 
     "CLCS", "CMB", "CMP", "CNP", "CPP", "CPCU", "Crowe", "Crue", "CRCP", "CRMA", "CRU", "DBA", "Data Science", "Esq", "FCCA", "FMP",
     "GCED", "GRS", "GSLC", "HCA", "HRD", "IPPI", "JD", "LLM", "LUMA", "MA", "MAI", "MAcc", "MBA", "MEd", "MPA", "MPH", "MS", "MSA",
@@ -86,10 +86,10 @@ def is_human_name(name):
         )
 
     # Remove trailing punctuation and symbols (except hyphens now)
-    name_cleaned = re.sub(r'[\s,.;:/\\|_\(\)\[\]\{\}\'"!?\@\#\$\%\^\&\*\~\`]+$', '', name_cleaned).strip()
+    name_cleaned = re.sub(r'[\s,.;:/\\|_\(\)\[\]\{\}\'"!?\@\#\$\%\^\&\*\~\` - ]+$', '', name_cleaned).strip()
 
     # Remove periods only, retain hyphens
-    name_cleaned = name_cleaned.replace('.', '')
+    name_cleaned = name_cleaned.replace('.','',)
 
     # Strip extra spaces
     name_cleaned = re.sub(r'\s+', ' ', name_cleaned).strip()
@@ -108,6 +108,7 @@ def upload_and_convert(request):
         if form.is_valid():
             # Check if country is selected
             selected_country = request.POST.get('country', '').strip()
+            selected_industry = request.POST.get('industry', '').strip()
             if not selected_country:
                 messages.error(request, "Please select a valid country.")
                 return render(request, 'upload_and_convert.html', {'form': form})
@@ -147,7 +148,7 @@ def upload_and_convert(request):
                             'Country': selected_country,
                             'Designation': 'N/A',
                             'Location': 'N/A',
-                            'Industry': 'N/A',
+                            'Industry': selected_industry,
                             'Source': 'LinkedIn',
                             'Raw Full Name': raw_full_name,
                             'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
@@ -169,7 +170,7 @@ def upload_and_convert(request):
                             'Country': selected_country,
                             'Designation': 'N/A',
                             'Location': 'N/A',
-                            'Industry': 'N/A',
+                            'Industry': selected_industry or 'N/A',
                             'Source': 'LinkedIn',
                             'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
                         })
@@ -226,7 +227,7 @@ def upload_and_convert(request):
                             'Country': selected_country,
                             'Designation': role,
                             'Location': 'N/A',
-                            'Industry': 'N/A',
+                            'Industry': selected_industry or 'N/A',
                             'Source': 'LinkedIn',
                             'Raw Full Name': raw_full_name,
                             'File Name': f'LinkedIn_{datetime.today().strftime("%Y-%m-%d")}',
@@ -250,7 +251,7 @@ def upload_and_convert(request):
                         'Country': selected_country,
                         'Designation': role,
                         'Location': location,
-                        'Industry': industry,
+                        'Industry': selected_industry or 'N/A',
                         'Source': source,
                         'Full Name': full_name,
                         'Raw Full Name': raw_full_name,
@@ -462,7 +463,6 @@ def generate_emails(request):
 
                 # Exclude rows with numbers in any of the required columns
                 df = df[~df[['Company Name', 'First Name', 'Last Name', 'Country']].apply(lambda x: x.astype(str).str.contains('\d')).any(axis=1)]
-
                 generated_emails = []
                 missing_companies = []
                 missing_format = []
