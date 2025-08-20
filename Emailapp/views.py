@@ -64,7 +64,7 @@ EXCLUDED_COMPANIES = {
     "3M", "abc", "Abilis Solutions", "Accenture", "Adobe", "AECOM", "Affinity", "Amazon", "Amex", "Aon", 
     "Bell", "BlackBerry", "CBC", "CGI", "CIBC", "Cisco", "Citi Bank", "Citizens", "Cognizant", "Dell", 
     "Deloitte Inc.", "GE", "Hewlett Packard", "Infosys", "JP Morgan", "Microsoft", "Oracle", "ORANGE", 
-    "RBC Bank", "Sage", "Scotiabank", "SE Health", "Siemens", "Sisense", "TD Bank", "TELUS", "Wipro"
+    "RBC Bank", "Sage", "Scotiabank", "SE Health", "Siemens", "Sisense", "TD Bank", "TELUS", "Wipro",
 }
 
 def is_valid_company(company_name):
