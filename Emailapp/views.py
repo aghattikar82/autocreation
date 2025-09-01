@@ -8,7 +8,6 @@ from django.http import HttpResponse
 from .forms import UploadFileForm
 import openpyxl
 import re
-from collections import defaultdict
 import datetime
 from datetime import datetime
 from .forms import UploadNotepadForm, UploadFileForm
@@ -47,7 +46,14 @@ EXCLUDED_TITLES = [
     "MSBA", "MSF", "MSHRM", "MSITM", "MSM", "MSMIT", "MSRE", "MST", "PhD", "Polen", "PSP", "RES", "RRS", "Science", "SHRMCP", 
     "SHRMSCP", "SRA", "SPC", "SPHR", "US", "Zin","cet","eit","cphr","phd","msc","bsc","ctech","p eng","m eng","meng","peng","CHRP","RSE",
     "CRHA","bba","CHRL","DipWSET","Dr","md","PhD","MSc","BSc","B.Eng","M.Eng","MBA","PMP","CFA","CPA","CA","CMA","ed",
-    "MSc,",",",
+    "MSc,",",","CBIP,","PQS,","Sr,","CSC,","Eng,","MEngg,","CMC,","CTFLCTAL,","PMI-,","CRISC,","IEng,",
+    "BMOS,","BEng,","SMC,","MS.c,","BPR,","M.HRM,","M.Sc,","M.Sc,","BAA,","B.Sc,","P. Eng,","ChPP","B.Engg,",
+    "ACA,","MIT","Eng.,","M.Sc.,","infs,","P. Eng,","M.Sc.,","SMC,","Eng.,","B.A.Sc,","CMC,","BComm,","MSc.",
+    "B.Sc,","M.Sc,","P.M.P.","GISP","I.S.P.","OTL PCP","CIP","M.Ing","IDRISSI","B.Comm.","CGA","ACS and ALMI",
+    ",CIPM","ing.","COHC","Ph.D","M.Sc.",",MCT","PhD","CRM,CIP","ICDD","P. Eng.","NCSO HSA","B.Ing","PFP","CFP",
+    "Osmond","B.Comm","CIP","ICWA","CSPO ICP-PDM","Ph.D","CFA FRM PRM","MSc IT","MSc CEC","CLSSGB","RPhT",
+    "BScH MBA PMP","MHSc CIH","CFP","BSE","M.Sc.","CSSBB","P. Eng","LSSGB","MIET","ENG","ICD.D","RPhT","MASc",
+    "M.Fisc.","CPC","M. Sc.","CRSP",
 ]
 # Set of company names to exclude
 # This set contains common company names, freelance terms, and other keywords that should be excluded`
