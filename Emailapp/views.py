@@ -13,6 +13,80 @@ from datetime import datetime
 from .forms import UploadNotepadForm, UploadFileForm
 from unidecode import unidecode
 
+#below imports are for APIs
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
+from .models import UserRegister, Company, EmailFormat
+from .serializers import CompanySerializer, EmailFormatSerializer, UserRegisterSerializer
+from django.db.models import Count
+
+@api_view(['GET'])
+def dashboard_insights(request):
+    # Total counts
+    total_users = UserRegister.objects.count()
+    total_companies = Company.objects.count()
+    total_email_formats = EmailFormat.objects.count()
+
+    # Country-wise counts
+    companies_by_country = Company.objects.values('country').annotate(count=Count('id'))
+    email_formats_by_country = EmailFormat.objects.values('company__country').annotate(count=Count('id'))
+
+    data = {
+        "total_users": total_users,
+        "total_companies": total_companies,
+        "total_email_formats": total_email_formats,
+        "companies_by_country": list(companies_by_country),
+        "email_formats_by_country": list(email_formats_by_country),
+    }
+
+    return Response(data)
+
+# ✅ Paginated Companies (filter by country)
+@api_view(['GET'])
+def company_list(request):
+    country = request.GET.get('country')
+    queryset = Company.objects.all().order_by('id')
+    if country:
+        queryset = queryset.filter(country=country)
+
+    paginator = PageNumberPagination()
+    paginator.page_size = 100  # Load 100 at a time
+    result_page = paginator.paginate_queryset(queryset, request)
+    serializer = CompanySerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+
+# ✅ Paginated Email Formats (filter by company or country)
+# Email formats
+@api_view(['GET'])
+def emailformat_list(request):
+    company_id = request.GET.get('company_id')
+    country = request.GET.get('country')
+
+    queryset = EmailFormat.objects.select_related('company').all().order_by('id')
+
+    if company_id:
+        queryset = queryset.filter(company_id=company_id)
+    if country:
+        queryset = queryset.filter(company__country=country)
+
+    paginator = PageNumberPagination()
+    paginator.page_size = 100
+    result_page = paginator.paginate_queryset(queryset, request)
+    serializer = EmailFormatSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+
+
+# ✅ Users (basic, no pagination unless needed)
+@api_view(['GET'])
+def user_list(request):
+    queryset = UserRegister.objects.all().order_by('id')
+    serializer = UserRegisterSerializer(queryset, many=True)
+    return Response(serializer.data)
+
+
 def index(request):
     msg = ''
     userpassword=""
